@@ -319,6 +319,10 @@ class Config
     // -1 follows the model's LocalStructure setting.
     CustomOptional<float> DlssNrSkinStructure { -1.0f };
     CustomOptional<bool> DlssNrAutoMask { true };
+    // DLSSNR.MaskBlendMode (NR 310.9.16, 0..3). Unset (auto) is never sent, so the runtime keeps its default.
+    CustomOptional<uint32_t, NoDefault> DlssNrMaskBlendMode;
+    // DLSSNR.UICorrection. No UI layer is fed to the model, so this only switches the model's own correction.
+    CustomOptional<bool> DlssNrUiCorrection { true };
     // Optional final-composition filter, independent of the model's semantic mask.
     CustomOptional<bool> DlssNrSkinProtection { false };
     CustomOptional<float> DlssNrSkinDetail { 1.0f };
@@ -333,9 +337,9 @@ class Config
     // Passes 2..30 inherit pass 1, except LocalTone defaults to zero.
     struct NrPassOverrides
     {
-        CustomOptional<uint32_t, NoDefault> preset, style;
+        CustomOptional<uint32_t, NoDefault> preset, style, maskBlendMode;
         CustomOptional<float, NoDefault> intensity, structure, tone, skin;
-        CustomOptional<bool, NoDefault> autoMask;
+        CustomOptional<bool, NoDefault> autoMask, uiCorrection;
     };
     NrPassOverrides DlssNrPassOverrides[29]; // Existing Pass2..Pass30 INI keys remain unchanged.
 

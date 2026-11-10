@@ -45,12 +45,14 @@ void LogGameSettings(const NVSDK_NGX_Parameter* params)
 {
     const auto preset = Read<unsigned int>(params, "DLSSNR.Hint.Render.Preset");
     LOG_INFO("DLSS-NR (game): model settings: Preset={} -> {}, Style={}, Intensity={}, LocalStructure={}, "
-             "LocalTone={}, SkinStructure={}, AutoMask={}, Size={}x{}",
+             "LocalTone={}, SkinStructure={}, AutoMask={}, MaskBlendMode={}, UICorrection={}, Size={}x{}",
              Text(preset), ModelName(preset), Text(Read<unsigned int>(params, "DLSSNR.Style")),
              Text(Read<float>(params, "DLSSNR.Intensity")), Text(Read<float>(params, "DLSSNR.LocalStructureStrength")),
              Text(Read<float>(params, "DLSSNR.LocalToneStrength")),
              Text(Read<float>(params, "DLSSNR.SkinStructureStrength")),
-             Text(Read<unsigned int>(params, "DLSSNR.UseAutoMask")), Text(Read<unsigned int>(params, "DLSSNR.Width")),
+             Text(Read<unsigned int>(params, "DLSSNR.UseAutoMask")),
+             Text(Read<unsigned int>(params, "DLSSNR.MaskBlendMode")),
+             Text(Read<unsigned int>(params, "DLSSNR.UICorrection")), Text(Read<unsigned int>(params, "DLSSNR.Width")),
              Text(Read<unsigned int>(params, "DLSSNR.Height")));
 }
 
