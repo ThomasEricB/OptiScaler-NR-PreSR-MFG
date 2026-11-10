@@ -35,12 +35,14 @@ inline ModelSettings PassSettings(const Config& cfg, unsigned int pass)
     result.style = std::min(result.style, 2u);
     if (result.maskBlendMode.has_value())
         result.maskBlendMode = std::min(*result.maskBlendMode, 3u);
-    const auto bounded = [](float value, float fallback, float minimum)
-    { return std::isfinite(value) ? std::clamp(value, minimum, 2.0f) : fallback; };
-    result.intensity = bounded(result.intensity, 1.0f, 0.0f);
-    result.localStructure = bounded(result.localStructure, 1.0f, 0.0f);
-    result.localTone = bounded(result.localTone, pass == 0 ? 1.0f : 0.0f, 0.0f);
-    result.skinStructure = bounded(result.skinStructure, -1.0f, -1.0f);
+    // Strengths go up to 4, as other NR hosts allow; any limit of its own is the runtime's.
+    // Skin structure keeps its -1..2 range.
+    const auto bounded = [](float value, float fallback, float minimum, float maximum)
+    { return std::isfinite(value) ? std::clamp(value, minimum, maximum) : fallback; };
+    result.intensity = bounded(result.intensity, 1.0f, 0.0f, 4.0f);
+    result.localStructure = bounded(result.localStructure, 1.0f, 0.0f, 4.0f);
+    result.localTone = bounded(result.localTone, pass == 0 ? 1.0f : 0.0f, 0.0f, 4.0f);
+    result.skinStructure = bounded(result.skinStructure, -1.0f, -1.0f, 2.0f);
     return result;
 }
 } // namespace DlssNr::Profiles

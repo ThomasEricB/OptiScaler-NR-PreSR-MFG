@@ -370,11 +370,11 @@ void RenderModel(Config* config)
     const auto tuning = [&](auto& intensity, auto& structure, auto& tone, auto& skin, auto& autoMask,
                             auto& maskBlendMode, auto& uiCorrection)
     {
-        DeferredSlider("Intensity", &intensity, 0.0f, 2.0f,
+        DeferredSlider("Intensity", &intensity, 0.0f, 4.0f,
                        inherited ? config->DlssNrIntensity.value_or_default() : 1.0f, inherited);
-        DeferredSlider("Local structure", &structure, 0.0f, 2.0f,
+        DeferredSlider("Local structure", &structure, 0.0f, 4.0f,
                        inherited ? config->DlssNrLocalStructure.value_or_default() : 1.0f, inherited);
-        DeferredSlider("Local tone", &tone, 0.0f, 2.0f, inherited ? 0.0f : 1.0f, inherited);
+        DeferredSlider("Local tone", &tone, 0.0f, 4.0f, inherited ? 0.0f : 1.0f, inherited);
         DeferredSlider("Skin structure", &skin, -1.0f, 2.0f,
                        inherited ? config->DlssNrSkinStructure.value_or_default() : -1.0f, inherited);
         bool mask = autoMask.value_or(inherited ? config->DlssNrAutoMask.value_or_default() : true);
@@ -454,7 +454,7 @@ void RenderBlend(Config* config)
         HelpMarker(
             "Match early NR brightness changes to the finished HDR image. Adds GPU work; unreliable fits fall back.");
     }
-    Slider("Detail strength", config->DlssNrTransferStrength, 0.0f, 2.0f, "%.2f", 1.0f);
+    Slider("Detail strength", config->DlssNrTransferStrength, 0.0f, 4.0f, "%.2f", 1.0f);
     HelpMarker("0 = no detail change. 1 = normal.");
 
     Slider("Colour strength", config->DlssNrColourStrength, 0.0f, 4.0f, "%.2f", 1.0f);
