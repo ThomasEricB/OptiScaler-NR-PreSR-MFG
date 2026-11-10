@@ -110,6 +110,11 @@ bool XellHooks::update()
 
 xell_result_t XellHooks::hkxellDestroyContext(xell_context_handle_t context)
 {
+    // shouldBlock() records any context it sees as the game's, so decide before forgetting this one. Asking
+    // afterwards stored the destroyed context again, and update() then called xellGetSleepMode on freed memory
+    // every frame (a game that destroys a context at startup, e.g. Crimson Desert, crashed or hung).
+    const bool block = shouldBlock(context);
+
     if (gamesContext == context)
     {
         gamesContext = nullptr;
@@ -117,7 +122,7 @@ xell_result_t XellHooks::hkxellDestroyContext(xell_context_handle_t context)
         gamesContextSentTo = nullptr;
     }
 
-    if (shouldBlock(context))
+    if (block)
         return XELL_RESULT_SUCCESS;
     // spdlog::info("xellDestroyContext");
     return o_xellDestroyContext(context);
