@@ -58,6 +58,7 @@ void SetCreationParameters(NVSDK_NGX_Parameter* params, const DlssNr::ModelSetti
     params->Set("DLSSNR.Height", height);
     params->Set("CreationNodeMask", 1u);
     params->Set("VisibilityNodeMask", 1u);
+    DlssNr::SetNetworkScale(params, width, height);
 
     // Set the default preset explicitly, too.
     params->Set("DLSSNR.Hint.Render.Preset", (unsigned int) settings.preset);

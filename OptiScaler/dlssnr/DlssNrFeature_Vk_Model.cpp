@@ -91,6 +91,7 @@ bool ModelVk::Impl::CreateModel(VkCommandBuffer commandBuffer, unsigned int pass
     parameters->Set("DLSSNR.Height", height);
     parameters->Set("CreationNodeMask", 1u);
     parameters->Set("VisibilityNodeMask", 1u);
+    SetNetworkScale(parameters, width, height);
     parameters->Set("DLSSNR.Hint.Render.Preset", Profiles::PassSettings(config, passIndex).preset);
     SetModelTuning(parameters, Profiles::PassSettings(config, passIndex));
     parameters->Set("DLSSNR.ControlMask", static_cast<void*>(nullptr));
