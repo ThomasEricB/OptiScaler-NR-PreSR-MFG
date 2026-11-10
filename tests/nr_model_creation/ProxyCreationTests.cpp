@@ -326,6 +326,37 @@ bool quarantinedRecordingDoesNotRecreate()
     return !ready && Mock::creations == creations;
 }
 
+// DLSSNR.MaskBlendMode is only sent when chosen; UICorrection follows the setting (default on).
+template <class T> bool HasValue(const char* key, T expected)
+{
+    const auto it = Mock::latest->values.find(key);
+    return it != Mock::latest->values.end() && std::holds_alternative<T>(it->second) &&
+           std::get<T>(it->second) == expected;
+}
+bool defaultCreationLeavesMaskBlendModeUnsent()
+{
+    ProxyFixture f;
+    return f.Create() && !Mock::latest->values.contains("DLSSNR.MaskBlendMode") && HasValue("DLSSNR.UICorrection", 1u);
+}
+bool chosenMaskControlsReachCreation()
+{
+    ProxyFixture f;
+    f.settings.maskBlendMode = 2u;
+    f.settings.uiCorrection = false;
+    return f.Create() && HasValue("DLSSNR.MaskBlendMode", 2u) && HasValue("DLSSNR.UICorrection", 0u);
+}
+bool clearingMaskBlendModeRebuildsWithoutIt()
+{
+    ProxyFixture f;
+    f.settings.maskBlendMode = 3u;
+    if (!f.Create() || !HasValue("DLSSNR.MaskBlendMode", 3u))
+        return false;
+    const auto creations = Mock::creations;
+    const auto allocations = Mock::allocations;
+    f.settings.maskBlendMode.reset();
+    return f.Create(11) && Mock::creations == creations + 1 && Mock::allocations == allocations + 1 &&
+           !Mock::latest->values.contains("DLSSNR.MaskBlendMode");
+}
 int main()
 {
     struct Case
@@ -349,6 +380,9 @@ int main()
         { "quarantined recording cannot enable or recreate", quarantinedRecordingDoesNotRecreate },
         { "retired/current creation notifications", retiredAndCurrentCreationReceiveNotifications },
         { "Run cannot evaluate unsubmitted model", prepareCannotEvaluateUnsubmittedModel },
+        { "default creation does not send MaskBlendMode", defaultCreationLeavesMaskBlendModeUnsent },
+        { "chosen mask blend mode and UI correction reach creation", chosenMaskControlsReachCreation },
+        { "clearing mask blend mode rebuilds without it", clearingMaskBlendModeRebuildsWithoutIt },
     };
     unsigned failures = 0;
     for (const auto& test : cases)
