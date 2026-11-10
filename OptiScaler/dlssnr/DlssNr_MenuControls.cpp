@@ -303,6 +303,32 @@ template <typename Option> static void NrModelCombo(Option* opt, bool allowInher
                "Changing the model rebuilds this pass and resets its history.");
 }
 
+// DLSSNR.MaskBlendMode: unset is never sent (pass 1) or inherits pass 1 (later passes).
+template <typename Option> static void MaskBlendModeCombo(Option* opt, bool allowInherit)
+{
+    static const char* modes[] = { "Mode 0", "Mode 1", "Mode 2", "Mode 3" };
+    const char* unset = allowInherit ? "Auto (pass 1)" : "Runtime default";
+    const char* preview = opt->has_value() ? modes[std::min(opt->value(), 3u)] : unset;
+    if (ImGui::BeginCombo("Mask blend mode", preview))
+    {
+        if (ImGui::Selectable(unset, !opt->has_value()))
+            *opt = std::optional<uint32_t> {};
+        for (uint32_t mode = 0; mode < IM_ARRAYSIZE(modes); ++mode)
+        {
+            const bool selected = opt->has_value() && opt->value() == mode;
+            if (ImGui::Selectable(modes[mode], selected))
+                *opt = mode;
+            if (selected)
+                ImGui::SetItemDefaultFocus();
+        }
+        ImGui::EndCombo();
+    }
+    HelpMarker("How the model combines its skin mask (Auto skin mask, Skin structure) with its edit "
+               "(DLSSNR.MaskBlendMode, experimental). Read by NR 310.9.16; older runtimes ignore it.\n"
+               "Runtime default sends nothing and keeps the runtime's own choice.\n"
+               "Changing it rebuilds this pass and resets its history.");
+}
+
 void RenderModel(Config* config)
 {
     bool unlockPasses = config->DlssNrUnlockPasses.value_or_default();
@@ -341,7 +367,8 @@ void RenderModel(Config* config)
     // Distinct widget IDs keep uncommitted slider edits with their selected pass.
     ImGui::PushID((int) selectedPass);
     const bool inherited = selectedPass != 0;
-    const auto tuning = [&](auto& intensity, auto& structure, auto& tone, auto& skin, auto& autoMask)
+    const auto tuning = [&](auto& intensity, auto& structure, auto& tone, auto& skin, auto& autoMask,
+                            auto& maskBlendMode, auto& uiCorrection)
     {
         DeferredSlider("Intensity", &intensity, 0.0f, 2.0f,
                        inherited ? config->DlssNrIntensity.value_or_default() : 1.0f, inherited);
@@ -360,6 +387,18 @@ void RenderModel(Config* config)
                 autoMask = std::optional<bool> {};
         }
         HelpMarker("Model-based skin selection.");
+        MaskBlendModeCombo(&maskBlendMode, inherited);
+        bool correction = uiCorrection.value_or(inherited ? config->DlssNrUiCorrection.value_or_default() : true);
+        if (ImGui::Checkbox("UI correction", &correction))
+            uiCorrection = correction;
+        if (inherited)
+        {
+            ImGui::SameLine();
+            if (ImGui::SmallButton("Reset##uiCorrection"))
+                uiCorrection = std::optional<bool> {};
+        }
+        HelpMarker("The model's own UI correction (DLSSNR.UICorrection). On by default. No UI layer is passed to "
+                   "the model. Changing it rebuilds this pass.");
     };
     static const char* styles[] = { "Standard", "Natural", "Cinematic" };
     static const char* inheritedStyles[] = { "Auto", "Standard", "Natural", "Cinematic" };
@@ -370,7 +409,8 @@ void RenderModel(Config* config)
         if (ImGui::Combo("Style", &style, styles, IM_ARRAYSIZE(styles)))
             config->DlssNrStyle = (uint32_t) style;
         tuning(config->DlssNrIntensity, config->DlssNrLocalStructure, config->DlssNrLocalTone,
-               config->DlssNrSkinStructure, config->DlssNrAutoMask);
+               config->DlssNrSkinStructure, config->DlssNrAutoMask, config->DlssNrMaskBlendMode,
+               config->DlssNrUiCorrection);
     }
     else
     {
@@ -379,7 +419,8 @@ void RenderModel(Config* config)
         int style = pass.style.has_value() ? std::clamp((int) pass.style.value(), 0, 2) + 1 : 0;
         if (ImGui::Combo("Style", &style, inheritedStyles, IM_ARRAYSIZE(inheritedStyles)))
             pass.style = style ? std::optional<uint32_t>(style - 1) : std::nullopt;
-        tuning(pass.intensity, pass.structure, pass.tone, pass.skin, pass.autoMask);
+        tuning(pass.intensity, pass.structure, pass.tone, pass.skin, pass.autoMask, pass.maskBlendMode,
+               pass.uiCorrection);
     }
     ImGui::PopID();
 }
