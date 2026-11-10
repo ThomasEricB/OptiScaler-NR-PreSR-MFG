@@ -14,7 +14,9 @@ inline ModelSettings PassSettings(const Config& cfg, unsigned int pass)
                            cfg.DlssNrLocalStructure.value_or_default(),
                            pass == 0 ? cfg.DlssNrLocalTone.value_or_default() : 0.0f,
                            cfg.DlssNrSkinStructure.value_or_default(),
-                           cfg.DlssNrAutoMask.value_or_default() };
+                           cfg.DlssNrAutoMask.value_or_default(),
+                           cfg.DlssNrMaskBlendMode,
+                           cfg.DlssNrUiCorrection.value_or_default() };
     if (pass > 0 && pass <= std::size(cfg.DlssNrPassOverrides))
     {
         const auto& extra = cfg.DlssNrPassOverrides[pass - 1];
@@ -25,9 +27,14 @@ inline ModelSettings PassSettings(const Config& cfg, unsigned int pass)
         result.localTone = extra.tone.value_or(result.localTone);
         result.skinStructure = extra.skin.value_or(result.skinStructure);
         result.autoMask = extra.autoMask.value_or(result.autoMask);
+        if (extra.maskBlendMode.has_value())
+            result.maskBlendMode = extra.maskBlendMode.value();
+        result.uiCorrection = extra.uiCorrection.value_or(result.uiCorrection);
     }
     result.preset = std::min(result.preset, 3u);
     result.style = std::min(result.style, 2u);
+    if (result.maskBlendMode.has_value())
+        result.maskBlendMode = std::min(*result.maskBlendMode, 3u);
     const auto bounded = [](float value, float fallback, float minimum)
     { return std::isfinite(value) ? std::clamp(value, minimum, 2.0f) : fallback; };
     result.intensity = bounded(result.intensity, 1.0f, 0.0f);

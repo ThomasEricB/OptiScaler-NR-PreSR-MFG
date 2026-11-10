@@ -1,7 +1,8 @@
-#pragma once
+﻿#pragma once
 
 #include "../shaders/dlssnr/DlssNr_Guides.h"
 #include <nvsdk_ngx_params.h>
+#include <optional>
 
 namespace DlssNr
 {
@@ -10,6 +11,10 @@ struct ModelSettings
     unsigned int preset = 0, style = 0;
     float intensity = 1.0f, localStructure = 1.0f, localTone = 0.0f, skinStructure = -1.0f;
     bool autoMask = true;
+    // DLSSNR.MaskBlendMode, read by nvngx_dlssnr.dll 310.9.16 (modes 0..3). Unset leaves the key unwritten,
+    // so the runtime keeps its own default, as before the setting existed.
+    std::optional<unsigned int> maskBlendMode {};
+    bool uiCorrection = true;
     bool operator==(const ModelSettings&) const = default;
 };
 
@@ -21,6 +26,9 @@ inline void SetModelTuning(NVSDK_NGX_Parameter* params, const ModelSettings& set
     params->Set("DLSSNR.LocalToneStrength", settings.localTone);
     params->Set("DLSSNR.SkinStructureStrength", settings.skinStructure);
     params->Set("DLSSNR.UseAutoMask", settings.autoMask ? 1u : 0u);
+    if (settings.maskBlendMode.has_value())
+        params->Set("DLSSNR.MaskBlendMode", *settings.maskBlendMode);
+    params->Set("DLSSNR.UICorrection", settings.uiCorrection ? 1u : 0u);
 }
 
 inline void SetModelRegions(NVSDK_NGX_Parameter* params, GuideExtent size, const GuideRegions& guides)

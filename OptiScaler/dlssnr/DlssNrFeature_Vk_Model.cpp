@@ -92,7 +92,6 @@ bool ModelVk::Impl::CreateModel(VkCommandBuffer commandBuffer, unsigned int pass
     parameters->Set("CreationNodeMask", 1u);
     parameters->Set("VisibilityNodeMask", 1u);
     parameters->Set("DLSSNR.Hint.Render.Preset", Profiles::PassSettings(config, passIndex).preset);
-    parameters->Set("DLSSNR.UICorrection", 1u);
     SetModelTuning(parameters, Profiles::PassSettings(config, passIndex));
     parameters->Set("DLSSNR.ControlMask", static_cast<void*>(nullptr));
     const auto result = NVNGXProxy::VULKAN_CreateFeature1()(

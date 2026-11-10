@@ -615,6 +615,8 @@ bool Config::Reload(std::filesystem::path iniPath)
             DlssNrLocalTone.set_from_config(readFloat("DlssNr", "LocalTone"));
             DlssNrSkinStructure.set_from_config(readFloat("DlssNr", "SkinStructure"));
             DlssNrAutoMask.set_from_config(readBool("DlssNr", "AutoMask"));
+            DlssNrMaskBlendMode.set_from_config(readUInt("DlssNr", "MaskBlendMode"));
+            DlssNrUiCorrection.set_from_config(readBool("DlssNr", "UICorrection"));
             DlssNrSkinProtection.set_from_config(readBool("DlssNr", "SkinProtection"));
             DlssNrSkinDetail.set_from_config(readFloat("DlssNr", "SkinDetail"));
             DlssNrSkinColour.set_from_config(readFloat("DlssNr", "SkinColour"));
@@ -638,6 +640,9 @@ bool Config::Reload(std::filesystem::path iniPath)
                 pass.tone.set_from_config(readFloat("DlssNr", std::format("Pass{}LocalTone", i + 2).c_str()));
                 pass.skin.set_from_config(readFloat("DlssNr", std::format("Pass{}SkinStructure", i + 2).c_str()));
                 pass.autoMask.set_from_config(readBool("DlssNr", std::format("Pass{}AutoMask", i + 2).c_str()));
+                pass.maskBlendMode.set_from_config(
+                    readUInt("DlssNr", std::format("Pass{}MaskBlendMode", i + 2).c_str()));
+                pass.uiCorrection.set_from_config(readBool("DlssNr", std::format("Pass{}UICorrection", i + 2).c_str()));
             }
             DlssNrReversibleMode.set_from_config(readUInt("DlssNr", "ReversibleMode"));
             DlssNrApplyModel.set_from_config(readBool("DlssNr", "ApplyModel"));
@@ -1645,6 +1650,9 @@ bool Config::SaveIni(std::filesystem::path destination)
         ini.SetValue("DlssNr", "SkinStructure",
                      GetFloatValue(Instance()->DlssNrSkinStructure.value_for_config()).c_str());
         ini.SetValue("DlssNr", "AutoMask", GetBoolValue(Instance()->DlssNrAutoMask.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "MaskBlendMode",
+                     GetIntValue(Instance()->DlssNrMaskBlendMode.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "UICorrection", GetBoolValue(Instance()->DlssNrUiCorrection.value_for_config()).c_str());
         ini.SetValue("DlssNr", "SkinProtection",
                      GetBoolValue(Instance()->DlssNrSkinProtection.value_for_config()).c_str());
         ini.SetValue("DlssNr", "SkinDetail", GetFloatValue(Instance()->DlssNrSkinDetail.value_for_config()).c_str());
@@ -1683,6 +1691,10 @@ bool Config::SaveIni(std::filesystem::path destination)
                          GetFloatValue(pass.skin.value_for_config()).c_str());
             ini.SetValue("DlssNr", std::format("Pass{}AutoMask", i + 2).c_str(),
                          GetBoolValue(pass.autoMask.value_for_config()).c_str());
+            ini.SetValue("DlssNr", std::format("Pass{}MaskBlendMode", i + 2).c_str(),
+                         GetIntValue(pass.maskBlendMode.value_for_config()).c_str());
+            ini.SetValue("DlssNr", std::format("Pass{}UICorrection", i + 2).c_str(),
+                         GetBoolValue(pass.uiCorrection.value_for_config()).c_str());
         }
         ini.SetValue("DlssNr", "ReversibleMode",
                      GetIntValue(Instance()->DlssNrReversibleMode.value_for_config()).c_str());
