@@ -93,6 +93,17 @@ bool changingEitherValueRebuildsThePass()
     const auto correction = DlssNr::Profiles::PassSettings(cfg, 0);
     return before != mode && mode != correction;
 }
+bool modelStrengthsReachFourAndSkinStaysAtTwo()
+{
+    Config cfg;
+    cfg.DlssNrIntensity = 4.0f;
+    cfg.DlssNrLocalStructure = 3.5f;
+    cfg.DlssNrLocalTone = 9.0f;
+    cfg.DlssNrSkinStructure = 3.0f;
+    const auto settings = DlssNr::Profiles::PassSettings(cfg, 0);
+    return settings.intensity == 4.0f && settings.localStructure == 3.5f && settings.localTone == 4.0f &&
+           settings.skinStructure == 2.0f;
+}
 } // namespace
 
 int main()
@@ -108,6 +119,7 @@ int main()
         { "later passes inherit pass 1 and take their own override", laterPassesInheritAndOverride },
         { "out-of-range mask blend mode is clamped to 3", outOfRangeModeIsClamped },
         { "changing either value rebuilds the pass", changingEitherValueRebuildsThePass },
+        { "model strengths reach 4, skin structure stays at 2", modelStrengthsReachFourAndSkinStaysAtTwo },
     };
     unsigned failures = 0;
     for (const auto& test : cases)
